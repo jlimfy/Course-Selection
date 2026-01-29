@@ -529,15 +529,31 @@ const CourseAdvisorApp = () => {
           <div className="bg-white rounded-lg shadow-lg p-6">
             <h2 className="text-xl font-semibold text-gray-800 mb-4">Sample File Format</h2>
             <div className="bg-gray-50 rounded border border-gray-200 p-4 font-mono text-sm overflow-x-auto">
-              <div>Course Code,Course Name,Credits,Type,Grade</div>
+              <div className="mb-1">Course Code,Course Name,Credits,Type,Grade</div>
               <div>BCY1013,Music Theory 1,3,Core,A</div>
               <div>BCY1814,Major Instrument 1,4,Core,B+</div>
               <div>BCL1413,Malaysian Music,3,Core,A-</div>
               <div>BCY1413,World Music,3,Elective,B</div>
+              <div>MPU3112,Penghayatan Etika dan Peradaban,2,Compulsory,C</div>
+              <div>BLE3012,Effective Speaking,2,Compulsory,B</div>
             </div>
             <p className="text-sm text-gray-600 mt-3">
               <strong>Note:</strong> Include Grade column to calculate CGPA. Type should be: Core, Compulsory, Elective, or Conditional
             </p>
+            <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-gray-700">
+                <strong>Grades Accepted:</strong> A+, A, A-, B+, B, B-, C+, C, C-, D+, D, F, S (Satisfactory)
+              </p>
+              <p className="text-sm text-gray-700 mt-2">
+                <strong>Course Types:</strong>
+              </p>
+              <ul className="text-sm text-gray-600 ml-4 mt-1">
+                <li>• <strong>Core</strong> - Required courses (94 credits total)</li>
+                <li>• <strong>Compulsory</strong> - Required with local/international variations (12 credits total)</li>
+                <li>• <strong>Elective</strong> - Your choice of electives (14 credits total)</li>
+                <li>• <strong>Conditional</strong> - Makeup courses (don't count toward 120 credits)</li>
+              </ul>
+            </div>
           </div>
         )}
       </div>
