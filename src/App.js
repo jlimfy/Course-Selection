@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Upload, BookOpen, GraduationCap, TrendingUp, AlertCircle, CheckCircle, XCircle, Award } from 'lucide-react';
+import { Upload, BookOpen, GraduationCap, TrendingUp, AlertCircle, XCircle, Award } from 'lucide-react';
 
 const CourseAdvisorApp = () => {
   const [completedCourses, setCompletedCourses] = useState([]);
