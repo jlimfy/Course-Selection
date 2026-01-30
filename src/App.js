@@ -205,20 +205,18 @@ const CourseAdvisorApp = () => {
         try {
           const data = new Uint8Array(e.target.result);
           
-          // Use SheetJS to parse Excel
-          const XLSX = await import('https://cdn.sheetjs.com/xlsx-0.20.1/package/xlsx.mjs');
-          const workbook = XLSX.read(data, { type: 'array' });
-          
-          // Get first sheet
-          const firstSheetName = workbook.SheetNames[0];
-          const worksheet = workbook.Sheets[firstSheetName];
-          
-          // Convert to CSV format
-          const csv = XLSX.utils.sheet_to_csv(worksheet);
-          
-          // Parse the CSV data
-          const courses = parseFile(csv);
-          resolve(courses);
+          // Load SheetJS from CDN
+          if (!window.XLSX) {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js';
+            script.onload = () => {
+              parseExcelData(data, resolve, reject);
+            };
+            script.onerror = () => reject(new Error('Failed to load Excel parser'));
+            document.head.appendChild(script);
+          } else {
+            parseExcelData(data, resolve, reject);
+          }
         } catch (error) {
           reject(new Error('Failed to parse Excel file: ' + error.message));
         }
@@ -227,6 +225,25 @@ const CourseAdvisorApp = () => {
       reader.onerror = () => reject(new Error('Failed to read Excel file'));
       reader.readAsArrayBuffer(file);
     });
+  };
+
+  const parseExcelData = (data, resolve, reject) => {
+    try {
+      const workbook = window.XLSX.read(data, { type: 'array' });
+      
+      // Get first sheet
+      const firstSheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[firstSheetName];
+      
+      // Convert to CSV format
+      const csv = window.XLSX.utils.sheet_to_csv(worksheet);
+      
+      // Parse the CSV data
+      const courses = parseFile(csv);
+      resolve(courses);
+    } catch (error) {
+      reject(new Error('Failed to parse Excel data: ' + error.message));
+    }
   };
 
   const parseFile = (text) => {
