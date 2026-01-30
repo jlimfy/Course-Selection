@@ -141,30 +141,92 @@ const CourseAdvisorApp = () => {
     if (!file) return;
 
     setError('');
-    const reader = new FileReader();
+    
+    const fileName = file.name.toLowerCase();
+    const isExcel = fileName.endsWith('.xlsx') || fileName.endsWith('.xls');
+    const isCSV = fileName.endsWith('.csv');
 
-    reader.onload = async (e) => {
-      try {
-        const text = e.target.result;
-        const courses = parseFile(text);
-        
-        if (courses.length === 0) {
-          setError('No valid courses found in file. Please check the format.');
-          return;
-        }
+    if (!isExcel && !isCSV) {
+      setError('Please upload a CSV or Excel file (.csv, .xlsx, .xls)');
+      return;
+    }
 
-        setCompletedCourses(courses);
-        if (studentTrack) {
-          analyzeProgress(courses, studentTrack);
-        } else {
-          setError('Please select your student track first.');
-        }
-      } catch (err) {
-        setError('Error reading file: ' + err.message);
+    try {
+      let courses;
+      
+      if (isExcel) {
+        // Handle Excel files
+        courses = await parseExcelFile(file);
+      } else {
+        // Handle CSV files
+        courses = await parseCSVFile(file);
       }
-    };
+      
+      if (courses.length === 0) {
+        setError('No valid courses found in file. Please check the format.');
+        return;
+      }
 
-    reader.readAsText(file);
+      setCompletedCourses(courses);
+      if (studentTrack) {
+        analyzeProgress(courses, studentTrack);
+      } else {
+        setError('Please select your student track first.');
+      }
+    } catch (err) {
+      setError('Error reading file: ' + err.message);
+    }
+  };
+
+  const parseCSVFile = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      
+      reader.onload = (e) => {
+        try {
+          const text = e.target.result;
+          const courses = parseFile(text);
+          resolve(courses);
+        } catch (error) {
+          reject(error);
+        }
+      };
+      
+      reader.onerror = () => reject(new Error('Failed to read CSV file'));
+      reader.readAsText(file);
+    });
+  };
+
+  const parseExcelFile = async (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      
+      reader.onload = async (e) => {
+        try {
+          const data = new Uint8Array(e.target.result);
+          
+          // Use SheetJS to parse Excel
+          const XLSX = await import('https://cdn.sheetjs.com/xlsx-0.20.1/package/xlsx.mjs');
+          const workbook = XLSX.read(data, { type: 'array' });
+          
+          // Get first sheet
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+          
+          // Convert to CSV format
+          const csv = XLSX.utils.sheet_to_csv(worksheet);
+          
+          // Parse the CSV data
+          const courses = parseFile(csv);
+          resolve(courses);
+        } catch (error) {
+          reject(new Error('Failed to parse Excel file: ' + error.message));
+        }
+      };
+      
+      reader.onerror = () => reject(new Error('Failed to read Excel file'));
+      reader.readAsArrayBuffer(file);
+    });
   };
 
   const parseFile = (text) => {
@@ -347,9 +409,9 @@ const CourseAdvisorApp = () => {
               />
               <label htmlFor="file-upload" className="cursor-pointer">
                 <Upload className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                <p className="text-gray-600 mb-2">Click to upload CSV or Excel file</p>
-                <p className="text-sm text-gray-500">Format: Course Code, Course Name, Credits, Type, Grade</p>
-                <p className="text-xs text-gray-400 mt-2">Example: BCY1013, Music Theory 1, 3, Core, A</p>
+                <p className="text-gray-600 mb-2">Click to upload your completed courses file</p>
+                <p className="text-sm text-gray-500">Accepts: CSV (.csv) or Excel (.xlsx, .xls)</p>
+                <p className="text-xs text-gray-400 mt-2">Use the provided template or create your own file</p>
               </label>
             </div>
 
