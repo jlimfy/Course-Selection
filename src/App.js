@@ -6,6 +6,7 @@ const CourseAdvisorApp = () => {
   const [studentTrack, setStudentTrack] = useState('');
   const [analysis, setAnalysis] = useState(null);
   const [error, setError] = useState('');
+  const [isDragging, setIsDragging] = useState(false);
 
   // ============================================
   // PROGRAM REQUIREMENTS - UPDATE HERE
