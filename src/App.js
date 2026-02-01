@@ -6,7 +6,6 @@ const CourseAdvisorApp = () => {
   const [studentTrack, setStudentTrack] = useState('');
   const [analysis, setAnalysis] = useState(null);
   const [error, setError] = useState('');
-  const [isDragging, setIsDragging] = useState(false);
 
   // ============================================
   // PROGRAM REQUIREMENTS - UPDATE HERE
@@ -387,29 +386,6 @@ const CourseAdvisorApp = () => {
     setStudentTrack(newTrack);
     if (completedCourses.length > 0) {
       analyzeProgress(completedCourses, newTrack);
-    }
-  };
-
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-
-    const files = e.dataTransfer.files;
-    if (files && files.length > 0) {
-      processFile(files[0]);
     }
   };
 
