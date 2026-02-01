@@ -337,7 +337,14 @@ const CourseAdvisorApp = () => {
     const failedCourses = courses.filter(studentCourse => {
       const catalogCourse = applicableCourses.find(c => c.code === studentCourse.code);
       if (!catalogCourse) return false;
+      // Only show failed Core and Compulsory courses
+      if (catalogCourse.type !== 'Core' && catalogCourse.type !== 'Compulsory') return false;
       return !checkGradePassing(studentCourse.grade, catalogCourse.minGrade);
+    });
+
+    const passedElectives = passedCourses.filter(sc => {
+      const cc = applicableCourses.find(c => c.code === sc.code);
+      return cc && cc.type === 'Elective';
     });
 
     const coreCreditsCompleted = coreCompleted.reduce((sum, c) => sum + c.credits, 0);
@@ -368,6 +375,7 @@ const CourseAdvisorApp = () => {
       remainingElectiveCredits,
       incompleteCoreAndCompulsory,
       failedCourses,
+      passedElectives,
       cgpa,
       progressPercentage: ((totalCreditsCompleted / programRequirements.totalCredits) * 100).toFixed(1)
     });
@@ -511,14 +519,14 @@ const CourseAdvisorApp = () => {
 
             {analysis.failedCourses.length > 0 && (
               <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-                <h2 className="text-xl font-semibold text-gray-800 mb-4">⚠️ Courses Below Minimum Grade - Must Retake</h2>
+                <h2 className="text-xl font-semibold text-gray-800 mb-4">⚠️ Core/Compulsory Courses Below Minimum Grade - Must Retake</h2>
                 <div className="space-y-3">
                   {analysis.failedCourses.map((course, idx) => (
                     <div key={idx} className="border border-red-200 bg-red-50 rounded-lg p-4 flex items-start gap-3">
                       <XCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
                       <div className="flex-grow">
                         <p className="font-semibold text-gray-800">{course.code} - {course.name}</p>
-                        <p className="text-sm text-gray-600">{course.credits} credits | Grade: {course.grade}</p>
+                        <p className="text-sm text-gray-600">{course.credits} credits | Type: {course.type} | Grade: {course.grade}</p>
                         <p className="text-xs text-red-700 mt-1">
                           ⚠ Must achieve minimum grade to receive credit
                         </p>
@@ -529,19 +537,50 @@ const CourseAdvisorApp = () => {
               </div>
             )}
 
+            <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">Elective Courses Summary</h2>
+              <div className="mb-4">
+                <p className="text-lg font-semibold text-gray-700">
+                  Total Elective Credits Completed: <span className="text-green-600">{analysis.electiveCreditsCompleted}</span> / {programRequirements.electiveCredits}
+                </p>
+                <p className="text-sm text-gray-600 mt-1">
+                  {analysis.remainingElectiveCredits > 0 
+                    ? `You need ${analysis.remainingElectiveCredits} more elective credits`
+                    : '✅ Elective requirement fulfilled!'}
+                </p>
+              </div>
+              
+              {analysis.passedElectives.length > 0 && (
+                <>
+                  <h3 className="font-semibold text-gray-700 mb-3">Completed Elective Courses:</h3>
+                  <div className="space-y-2">
+                    {analysis.passedElectives.map((course, idx) => (
+                      <div key={idx} className="border border-green-200 bg-green-50 rounded-lg p-3 flex justify-between items-center">
+                        <div>
+                          <p className="font-semibold text-gray-800">{course.code} - {course.name}</p>
+                          <p className="text-sm text-gray-600">Grade: {course.grade}</p>
+                        </div>
+                        <span className="text-green-600 font-semibold">{course.credits} credits</span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+
             {analysis.incompleteCoreAndCompulsory.length > 0 && (
               <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-                <h2 className="text-xl font-semibold text-gray-800 mb-4">Required Courses Still Needed</h2>
+                <h2 className="text-xl font-semibold text-gray-800 mb-4">Core & Compulsory Courses Still Needed</h2>
                 <div className="space-y-3">
-                  {analysis.incompleteCoreAndCompulsory.slice(0, 10).map((course, idx) => (
+                  {analysis.incompleteCoreAndCompulsory.slice(0, 15).map((course, idx) => (
                     <div key={idx} className="border border-blue-200 bg-blue-50 rounded-lg p-4">
                       <p className="font-semibold text-gray-800">{course.code} - {course.name}</p>
                       <p className="text-sm text-gray-600">{course.credits} credits | Type: {course.type}</p>
                     </div>
                   ))}
-                  {analysis.incompleteCoreAndCompulsory.length > 10 && (
+                  {analysis.incompleteCoreAndCompulsory.length > 15 && (
                     <p className="text-sm text-gray-600 text-center">
-                      ...and {analysis.incompleteCoreAndCompulsory.length - 10} more courses
+                      ...and {analysis.incompleteCoreAndCompulsory.length - 15} more courses
                     </p>
                   )}
                 </div>
