@@ -20,8 +20,8 @@ const CourseAdvisorApp = () => {
     
     // All available courses in the program
     allCourses: [
-      { code: 'SE004', name: 'Basic English', credits: 4, type: 'Core', forTrack: 'Local', minGrade: 'C', gpaInclusion: false },
-      { code: 'SE005', name: 'English Foundation', credits: 4, type: 'Core', forTrack: 'Local', minGrade: 'C', gpaInclusion: false },
+      { code: 'SE004', name: 'Basic English', credits: 4, type: 'Conditional', forTrack: 'Local', minGrade: 'C', gpaInclusion: false },
+      { code: 'SE005', name: 'English Foundation', credits: 4, type: 'Conditional', forTrack: 'Local', minGrade: 'C', gpaInclusion: false },
       { code: 'BCY1760', name: 'Masterclass Attendance 2', credits: 0, type: 'Core', forTrack: 'All', minGrade: 'C', gpaInclusion: false },
       { code: 'BCY1650', name: 'Recital Attendance 1', credits: 0, type: 'Core', forTrack: 'All', minGrade: 'S', gpaInclusion: false },
       { code: 'BCY1660', name: 'Recital Attendance 2', credits: 0, type: 'Core', forTrack: 'All', minGrade: 'S', gpaInclusion: false },
@@ -311,6 +311,30 @@ const CourseAdvisorApp = () => {
       c => c.forTrack === 'All' || c.forTrack === track
     );
 
+    // Create a map of alternative course codes (courses with multiple code options)
+    const courseAlternatives = {
+      'BCL1612': ['BCL1632'],
+      'BCL1632': ['BCL1612'],
+      'BCL1942': ['BCY1922'],
+      'BCY1922': ['BCL1942'],
+      'BCL1932': ['BCY1912'],
+      'BCY1912': ['BCL1932'],
+      'BCL1622': ['BCL1642'],
+      'BCL1642': ['BCL1622'],
+      'BCL2612': ['BCL2632'],
+      'BCL2632': ['BCL2612'],
+      'BCL2622': ['BCL2642'],
+      'BCL2642': ['BCL2622']
+    };
+
+    // Helper function to check if a course requirement is fulfilled
+    const isCourseCompleted = (requiredCode, completedCodes) => {
+      if (completedCodes.includes(requiredCode)) return true;
+      // Check if any alternative was completed
+      const alternatives = courseAlternatives[requiredCode] || [];
+      return alternatives.some(alt => completedCodes.includes(alt));
+    };
+
     const passedCourses = courses.filter(studentCourse => {
       const catalogCourse = applicableCourses.find(c => c.code === studentCourse.code);
       if (!catalogCourse) return false;
@@ -359,8 +383,26 @@ const CourseAdvisorApp = () => {
     const remainingTotalCredits = programRequirements.totalCredits - totalCreditsCompleted;
 
     const incompleteCoreAndCompulsory = applicableCourses.filter(
-      course => (course.type === 'Core' || course.type === 'Compulsory') && !passedCodes.includes(course.code)
+      course => {
+        // Only show Core and Compulsory courses
+        if (course.type !== 'Core' && course.type !== 'Compulsory') return false;
+        // Check if this course or any of its alternatives have been completed
+        return !isCourseCompleted(course.code, passedCodes);
+      }
     );
+
+    // Remove duplicates for courses with alternatives (only show one option)
+    const seenAlternatives = new Set();
+    const deduplicatedIncomplete = incompleteCoreAndCompulsory.filter(course => {
+      const alternatives = courseAlternatives[course.code] || [];
+      const allCodes = [course.code, ...alternatives].sort().join(',');
+      
+      if (seenAlternatives.has(allCodes)) {
+        return false; // Skip this duplicate
+      }
+      seenAlternatives.add(allCodes);
+      return true;
+    });
 
     const cgpa = calculateGPA(courses);
 
@@ -373,7 +415,7 @@ const CourseAdvisorApp = () => {
       remainingCoreCredits,
       remainingCompulsoryCredits,
       remainingElectiveCredits,
-      incompleteCoreAndCompulsory,
+      incompleteCoreAndCompulsory: deduplicatedIncomplete,
       failedCourses,
       passedElectives,
       cgpa,
