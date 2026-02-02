@@ -361,7 +361,7 @@ const CourseAdvisorApp = () => {
     const failedCourses = courses.filter(studentCourse => {
       const catalogCourse = applicableCourses.find(c => c.code === studentCourse.code);
       if (!catalogCourse) return false;
-      // Only show failed Core and Compulsory courses
+      // Only show failed Core and Compulsory courses (exclude Conditional and Elective)
       if (catalogCourse.type !== 'Core' && catalogCourse.type !== 'Compulsory') return false;
       return !checkGradePassing(studentCourse.grade, catalogCourse.minGrade);
     });
@@ -613,6 +613,9 @@ const CourseAdvisorApp = () => {
             {analysis.incompleteCoreAndCompulsory.length > 0 && (
               <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
                 <h2 className="text-xl font-semibold text-gray-800 mb-4">Core & Compulsory Courses Still Needed</h2>
+                <p className="text-sm text-gray-600 mb-3">
+                  These are required Core and Compulsory courses you haven't completed yet. Conditional courses are not shown here.
+                </p>
                 <div className="space-y-3">
                   {analysis.incompleteCoreAndCompulsory.slice(0, 15).map((course, idx) => (
                     <div key={idx} className="border border-blue-200 bg-blue-50 rounded-lg p-4">
