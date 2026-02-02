@@ -393,15 +393,27 @@ const CourseAdvisorApp = () => {
 
     // Remove duplicates for courses with alternatives (only show one option)
     const seenAlternatives = new Set();
-    const deduplicatedIncomplete = incompleteCoreAndCompulsory.filter(course => {
+    const deduplicatedIncomplete = [];
+    
+    incompleteCoreAndCompulsory.forEach(course => {
       const alternatives = courseAlternatives[course.code] || [];
       const allCodes = [course.code, ...alternatives].sort().join(',');
       
+      // Skip if we've already processed this group of alternatives
       if (seenAlternatives.has(allCodes)) {
-        return false; // Skip this duplicate
+        return;
       }
-      seenAlternatives.add(allCodes);
-      return true;
+      
+      // Check if ANY of the alternatives were completed
+      const anyAlternativeCompleted = [course.code, ...alternatives].some(code => 
+        isCourseCompleted(code, passedCodes)
+      );
+      
+      // Only add to list if none of the alternatives were completed
+      if (!anyAlternativeCompleted) {
+        seenAlternatives.add(allCodes);
+        deduplicatedIncomplete.push(course);
+      }
     });
 
     const cgpa = calculateGPA(courses);
