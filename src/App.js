@@ -80,7 +80,6 @@ const CourseAdvisorApp = () => {
       { code: 'BCL1252', name: 'German Diction', credits: 2, type: 'Elective', forTrack: 'All', minGrade: 'C', gpaInclusion: true },
       { code: 'BCY1882', name: 'Short Semester Second Major Instrument', credits: 2, type: 'Conditional', forTrack: 'All', minGrade: 'C', gpaInclusion: true },
       { code: 'FCF1022', name: 'Music Theory Rudiments 2', credits: 2, type: 'Conditional', forTrack: 'All', minGrade: 'C', gpaInclusion: false },
-      { code: 'MPU3112', name: 'Penghayatan Etika dan Peradaban', credits: 2, type: 'Compulsory', forTrack: 'All', minGrade: 'C', gpaInclusion: false },
       { code: 'BCL2032', name: 'Introduction to Post-Tonal Harmony', credits: 2, type: 'Elective', forTrack: 'All', minGrade: 'C', gpaInclusion: true },
       { code: 'BCL2303', name: 'Principles of Teaching', credits: 3, type: 'Core', forTrack: 'All', minGrade: 'C', gpaInclusion: true },
       { code: 'BCY2232', name: 'Introduction to Jazz Improvisation', credits: 2, type: 'Elective', forTrack: 'All', minGrade: 'C', gpaInclusion: true },
